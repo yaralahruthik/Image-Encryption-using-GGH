@@ -1,3 +1,10 @@
+'''
+Authors: Yarala Hruthik Reddy, Kuruba Kiran Kumar, Surya Keesara
+
+Title: GGH Cryptosystem Implemenation on Image Files
+
+'''
+
 from PIL import Image
 import random
 import numpy as np
