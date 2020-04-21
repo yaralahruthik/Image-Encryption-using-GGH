@@ -1,14 +1,13 @@
 '''
 Authors: Yarala Hruthik Reddy, Kuruba Kiran Kumar, Surya Keesara
 
-Title: GGH Cryptosystem Implemenation on Image Files
+Title: GGH Cryptosystem Implementation on Image Files
 
 '''
 
 from PIL import Image
 import random
 import numpy as np
-import sys
 import base64
 import binascii
 import os
@@ -17,31 +16,31 @@ import os
 # This function generates a private and public key
 
 def keyGen(dimension):
-    privateB = []
+    privateKey = []
     print("Searching for a private key")
     ratio = 1
     '''
     while True:
-        privateB = np.random.randint(-10, 10, size=(dimension,dimension))
-        ratio = hadamardRatio(privateB, dimension)
-        if(.8 <= ratio <= 1):
-            print(privateB)
+        privateKey = np.random.randint(-10, 10, size=(dimension,dimension))
+        ratio = hadamardRatio(privateKey, dimension)
+        if(.9 <= ratio <= 1):
+            print(privateKey)
             break
     '''
-    privateB = np.identity(dimension)
-    print(privateB)
+    privateKey = np.identity(dimension)
+    print(privateKey)
 
     print("Searching for a public key")
     while True:
         uniMod = randUniMod(dimension)
-        temp = np.matmul(uniMod, privateB)
+        temp = np.matmul(uniMod, privateKey)
         ratio = hadamardRatio(temp, dimension)
         if ratio <= .1:
-            publicB = temp
+            publicKey = temp
             break
-    print(publicB)
+    print(publicKey)
 
-    return privateB, publicB, uniMod
+    return privateKey, publicKey, uniMod
 
 
 # This function returns the Hadamard Ratio of a matrix
@@ -52,8 +51,8 @@ def hadamardRatio(matrix, dimension):
     mult = 1
     for v in matrix:
         mult = mult * np.linalg.norm(v)
-    hratio = (detOfLattice / mult) ** (1.0/dimension)
-    return hratio
+    hadRatio = (detOfLattice / mult) ** (1.0/dimension)
+    return hadRatio
 
 
 # This function returns a Random Unimodular matrix
@@ -65,7 +64,7 @@ def randUniMod(dimension):
     lowerTri = [[np.random.randint(-10, 10) if x <
                  y else 0 for x in range(dimension)] for y in range(dimension)]
 
-    #we want to create an upper and lower triangular matrix with +/- 1 in the diag
+    #Creating an upper trianglular and lower triangular matrices with diagonals as +1 or -1
     for r in range(len(upperTri)):
     	for c in range(len(upperTri)):
     		if(r == c):
@@ -148,10 +147,9 @@ def encodedToBinaryToEncrypted(seekVal):
 
 # Encryption Function
 
-def encrypt(encryptedInts, publicB):
+def encrypt(encryptedInts, publicKey):
     cypherText = []
-    for i in range(len(encryptedInts)):
-        cypherText = np.matmul(encryptedInts, publicB)
+    cypherText = np.matmul(encryptedInts, publicKey)
 
     #print("\n---------------------Cypher Array---------------------\n", cypherText)
     return cypherText
@@ -159,8 +157,8 @@ def encrypt(encryptedInts, publicB):
 
 # Decryption Function
 
-def decrypt(cypherText, privateB, publicB, uniModular):
-    A = privateB
+def decrypt(cypherText, privateKey, uniModular):
+    A = privateKey
     x = cypherText
     BPRIME = np.linalg.inv(A)
     BB = np.matmul(BPRIME, x)
@@ -176,7 +174,7 @@ def decrypt(cypherText, privateB, publicB, uniModular):
 
 # Writes decrypted message to a file
 
-def showMessage(filePath, message):
+def writeDecryptedMessage(filePath, message):
     file = open(filePath, "a+")
     for i in range(len(message)):
         letter = chr(abs(message[i]))
@@ -196,15 +194,16 @@ def showEncryptedMessage(filePath, message):
     file.close()
 '''
 
+
 # Writes Public key to a file
 
-def writeBlock(publicB):
+def writePublicKey(publicKey):
     file = open('PublicKey\\ggh_block.txt', 'w')
     file.write("------BEGIN GGH PUBLIC KEY BLOCK -----\n")
 
-    for row in range(len(publicB)):
-            for col in range(len(publicB)):
-                encoded = base64.b64encode(publicB[row][col])
+    for row in range(len(publicKey)):
+            for col in range(len(publicKey)):
+                encoded = base64.b64encode(publicKey[row][col])
                 file.write(str(encoded)[8:13])
             file.write("\n")
 
@@ -217,7 +216,7 @@ def writeBlock(publicB):
 def residueAdder(filePath, residueString):
     file = open(filePath, "a")
     for i in range(len(residueString)):
-        letter = chr(abs(residueString[i]))
+        letter = residueString[i]
         file.write(letter)
 
     file.close()
@@ -235,7 +234,7 @@ def main():
             print("Directory ", i,  " already exists")
 
     alice = keyGen(10)
-    writeBlock(alice[1])
+    writePublicKey(alice[1])
 
     cypherTextFile = []
 
@@ -258,7 +257,8 @@ def main():
             seekVal = seekVal + 10
         bob = encrypt(encryptedInts, alice[1])
         cypherTextFile.append(bob)
-    
+
+    residueString = residueString.decode("utf-8")
     writeTextBlocks("Encrypted\\cypherTextFile.txt", cypherTextFile)
     writeTextBlocks("Residue\\residueText.txt", residueString)
 
@@ -286,7 +286,7 @@ def main():
         if (seekVal >= len(cypherTextFile)):
             break
         else:
-            aliceReceives = decrypt(cypherTextFile[seekVal], alice[0], alice[1], alice[2])
+            aliceReceives = decrypt(cypherTextFile[seekVal], alice[0], alice[2])
             decryptedTextFile.append(aliceReceives)
         seekVal = seekVal + 1
     
@@ -299,10 +299,10 @@ def main():
         if (seekVal >= len(decryptedTextFile)):
             break
         else:
-            showMessage(OutputMessageFile, decryptedTextFile[seekVal])
+            writeDecryptedMessage(OutputMessageFile, decryptedTextFile[seekVal])
         seekVal = seekVal + 1
 
-    residueAdder("Decrypted\\decryptedMessage.txt", residueString)
+    residueAdder(OutputMessageFile, residueString)
 
     writeStringToImage(OutputMessageFile, "Decrypted\\decryptedImage.jpg")
 
