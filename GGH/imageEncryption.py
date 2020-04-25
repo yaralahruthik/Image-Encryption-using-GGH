@@ -149,7 +149,7 @@ def encodedToBinaryToEncrypted(seekVal):
 
 def encrypt(encryptedInts, publicKey):
     cypherText = []
-    cypherText = np.matmul(encryptedInts, publicKey)
+    cypherText = np.matmul(encryptedInts, publicKey)  
 
     #print("\n---------------------Cypher Array---------------------\n", cypherText)
     return cypherText
