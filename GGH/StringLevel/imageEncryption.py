@@ -241,8 +241,8 @@ def main():
     inputFileName = 'InputImages\\' + input("Enter Input file name with relative path (InputImages\\fileName.jpg or .png): ")
     OutputMessageFile = 'Decrypted\\' + input("Enter the file name with relative path (Decrypted\\fileName.txt) to output the decrypted message to: ")
     
-    black_and_white(inputFileName, 'BWImages\\bwImage.jpg')
-    stringEncoded = loadImage("BWImages\\bwImage.jpg")
+    #black_and_white(inputFileName, 'BWImages\\bwImage.jpg')
+    stringEncoded = loadImage(inputFileName)
     writeImageToString("ImageString\\imageString.txt", stringEncoded)
     print(len(stringEncoded))
 
