@@ -214,9 +214,9 @@ def writeEncryptedPixelsForImage(r, g, b, m, n):
     redArray = np.asarray(r)
     greenArray = np.asarray(g)
     blueArray = np.asarray(b)
-    redArray = redArray%26
-    greenArray = greenArray%26
-    blueArray = blueArray%26
+    redArray = redArray%255
+    greenArray = greenArray%255
+    blueArray = blueArray%255
     with open('redEncPix.txt', 'w') as rfile:
         for i in range(m):
             for j in range(n):
